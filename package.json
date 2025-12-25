@@ -1,0 +1,22 @@
+{
+  "name": "touch-typing-tutor",
+  "version": "1.0.0",
+  "description": "A web-based touch typing tutor.",
+  "main": "script.js",
+  "scripts": {
+    "test": "node run-tests.js",
+    "postinstall": "puppeteer browsers install chrome"
+  },
+  "keywords": [
+    "typing",
+    "tutor",
+    "touch-typing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^5.2.1",
+    "http-server": "^14.1.1",
+    "puppeteer": "^24.34.0"
+  }
+}
