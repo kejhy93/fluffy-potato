@@ -278,6 +278,7 @@ window.typingTutor = new TypingTutor();
 
 // For local testing, you might want to uncomment this if running index.html directly
 document.addEventListener('DOMContentLoaded', () => {
+    window.typingTutor.initLesson();
     // Global event listeners for physical key presses (these don't need to be re-attached per test)
     document.addEventListener('keydown', (e) => {
         // Only if the user-input element is focused, otherwise physical keypresses might interfere with other elements in the test runner
