@@ -74,6 +74,10 @@ function updateCharacterFeedback() {
     const lessonText = currentLesson.join(' ');
     const allSpans = lessonTextElement.querySelectorAll('span > span, span[class=""]');
 
+    console.log('--- updateCharacterFeedback started ---');
+    console.log('typedText:', typedText);
+    console.log('lessonText:', lessonText);
+
     allSpans.forEach(span => span.classList.remove('correct-char', 'incorrect-char', 'current-char'));
 
     let newCorrectChars = 0;
@@ -82,29 +86,41 @@ function updateCharacterFeedback() {
 
     for (let i = 0; i < typedText.length; i++) {
         const charSpan = allSpans[i];
-        if (!charSpan) continue;
+        if (!charSpan) {
+            console.log(`Char span not found for index ${i}`);
+            continue;
+        }
 
         newTotalChars++;
+        let charStatus = '';
         if (typedText[i] === lessonText[i]) {
             charSpan.classList.add('correct-char');
             newCorrectChars++;
+            charStatus = 'correct-char';
         } else {
             charSpan.classList.add('incorrect-char');
+            charStatus = 'incorrect-char';
         }
         upToChar = i;
+        console.log(`Index: ${i}, Typed: '${typedText[i]}', Expected: '${lessonText[i]}', Status: ${charStatus}`);
     }
     
     correctChars = newCorrectChars;
     totalChars = newTotalChars;
+    console.log('New correctChars:', correctChars);
+    console.log('New totalChars:', totalChars);
 
     // Highlight the next character
     if (upToChar + 1 < allSpans.length) {
         allSpans[upToChar + 1].classList.add('current-char');
         highlightCurrentKey(lessonText[upToChar + 1]);
+        console.log('Highlighting next char:', lessonText[upToChar + 1], 'at index', upToChar + 1);
     } else {
         // End of lesson, clear highlight
         highlightCurrentKey('');
+        console.log('End of lesson, clearing key highlight.');
     }
+    console.log('--- updateCharacterFeedback finished ---');
 }
 
 function handleLessonProgress() {
