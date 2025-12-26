@@ -204,27 +204,36 @@ function renderVirtualKeyboard() {
 }
 
 function highlightCurrentKey(expectedChar) {
+    console.log(`--- highlightCurrentKey started ---`);
+    console.log(`Expected char: '${expectedChar}'`);
     // Clear previous highlights
     document.querySelectorAll('.key.active').forEach(key => key.classList.remove('active'));
     document.querySelectorAll('.key.correct').forEach(key => key.classList.remove('correct'));
     document.querySelectorAll('.key.incorrect').forEach(key => key.classList.remove('incorrect'));
 
-    if (!expectedChar) return;
+    if (!expectedChar) {
+        console.log('No expected character, clearing active highlights.');
+        console.log(`--- highlightCurrentKey finished ---`);
+        return;
+    }
 
     // Find the key to highlight
     let targetKey = expectedChar.toLowerCase();
     if (expectedChar === ' ') {
         targetKey = 'space';
     } else if (['.', ',', '/', ';', '\'', '[', ']', '\\', '-', '=', '`'].includes(expectedChar)) {
-        // Handle special characters that might be represented differently in dataset.key
-        // For simplicity, we assume direct match or common mapping.
-        // A more robust solution might map these.
+        // Special characters are mapped directly
     }
+    console.log(`Target key: '${targetKey}'`);
 
     const keyElement = virtualKeyboardElement.querySelector(`[data-key="${targetKey}"]`);
     if (keyElement) {
         keyElement.classList.add('active');
+        console.log(`Highlighting key element:`, keyElement);
+    } else {
+        console.log(`No key element found for targetKey: '${targetKey}'`);
     }
+    console.log(`--- highlightCurrentKey finished ---`);
 }
 
 function startTimer() {
