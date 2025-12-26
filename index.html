@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch Typing Tutor</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Touch Typing Tutor</h1>
+        <div id="lesson-text"></div>
+        <textarea id="user-input" placeholder="Start typing here..." autofocus></textarea>
+        <div id="virtual-keyboard">
+            <!-- Keyboard layout will be generated here by JavaScript -->
+        </div>
+        <div class="stats">
+            <p>WPM: <span id="wpm">0</span></p>
+            <p>Accuracy: <span id="accuracy">100%</span></p>
+        </div>
+        <button id="restart-button">Restart Lesson</button>
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>

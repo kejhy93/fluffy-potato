@@ -1,1 +1,31 @@
-# fluffy-potato
+# Touch Typing Tutor
+
+A simple web-based application to help you learn and practice touch typing.
+
+## Features
+
+- Interactive typing lessons.
+- Real-time Words Per Minute (WPM) and Accuracy tracking.
+- Visual feedback for correct and incorrect keystrokes.
+- Virtual keyboard highlighting the next key to press.
+
+## How to Use
+
+1.  **Open `index.html`:** Simply open the `index.html` file in your web browser.
+2.  **Start Typing:** The lesson text will appear, and you can start typing in the input box below.
+3.  **Monitor Your Progress:** WPM and Accuracy will update as you type.
+4.  **Virtual Keyboard:** Observe the virtual keyboard for guidance on which key to press next.
+5.  **Restart Lesson:** Click the "Restart Lesson" button to try the current lesson again.
+
+## Project Structure
+
+- `index.html`: The main HTML file that structures the web page.
+- `style.css`: Contains the CSS rules to style the application.
+- `script.js`: Implements the core logic of the typing tutor, including lesson management, input handling, and statistics calculation.
+- `README.md`: This file, providing information about the project.
+
+## Publishing to GitHub Pages
+
+You can easily publish this typing tutor on GitHub Pages.
+
+Now you have a live touch typing tutor that you can share and use!
