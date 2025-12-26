@@ -37,25 +37,23 @@ async function runTests() {
     });
 
     // 4. Create a promise that resolves when QUnit is done, with a timeout to avoid hanging CI
-    const QUNIT_TIMEOUT_MS = 60_000;
-
-    let qunitDonePromise = Promise.race([
-      new Promise((resolve, reject) => {
-        page.exposeFunction('onQunitDone', (details) => {
-          resolve(details);
-        });
-      }),
-      new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error(`QUnit tests did not finish within ${QUNIT_TIMEOUT_MS}ms`));
+    const QUNIT_TIMEOUT_MS = 30000; // Increased timeout for potentially slow tests
+    
+    const qunitDonePromise = new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error(`QUnit tests did not finish within ${QUNIT_TIMEOUT_MS}ms`));
         }, QUNIT_TIMEOUT_MS);
-      }),
-    ]);
+
+        page.exposeFunction('onQunitDone', (details) => {
+            clearTimeout(timeout);
+            resolve(details);
+        });
+    });
 
     // 3. Navigate to the test page
     const testUrl = `http://localhost:${PORT}/tests/index.html`;
     console.log(`Navigating to ${testUrl}`);
-    await page.goto(testUrl, { waitUntil: 'networkidle0' });
+    await page.goto(testUrl, { waitUntil: 'domcontentloaded' });
     console.log('Page loaded.');
 
     // 5. Wait for the QUnit.done promise to resolve
