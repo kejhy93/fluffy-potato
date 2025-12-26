@@ -62,91 +62,85 @@ function initLesson() {
     restartButton.addEventListener('click', initLesson);
 }
 
-function handleUserInput(e) {
+function handleUserInput() {
     startTimer();
+    updateCharacterFeedback();
+    handleLessonProgress();
+    updateStats();
+}
 
+function updateCharacterFeedback() {
     const typedText = userInputElement.value;
-    const currentWord = currentLesson[currentWordIndex];
+    const lessonText = currentLesson.join(' ');
+    const allSpans = lessonTextElement.querySelectorAll('span > span, span[class=""]');
 
-    // Reset highlighting for all characters in the lesson text
-    const allCharSpans = lessonTextElement.querySelectorAll('span span');
-    allCharSpans.forEach(span => {
-        span.classList.remove('correct-char', 'incorrect-char', 'current-char');
-    });
+    allSpans.forEach(span => span.classList.remove('correct-char', 'incorrect-char', 'current-char'));
 
-    let lessonTextCombined = '';
-    lessonTextElement.querySelectorAll('span').forEach(span => {
-        lessonTextCombined += span.textContent;
-    });
-
-    let currentInputLength = 0;
     let newCorrectChars = 0;
     let newTotalChars = 0;
+    let upToChar = -1;
 
-    // Iterate through the typed text and compare with the lesson text
     for (let i = 0; i < typedText.length; i++) {
-        if (i < lessonTextCombined.length) {
-            const expectedChar = lessonTextCombined[i];
-            const typedChar = typedText[i];
-            const charSpan = allCharSpans[i];
+        const charSpan = allSpans[i];
+        if (!charSpan) continue;
 
-            if (charSpan) { // Ensure the span element exists
-                if (typedChar === expectedChar) {
-                    charSpan.classList.add('correct-char');
-                    newCorrectChars++;
-                } else {
-                    charSpan.classList.add('incorrect-char');
-                }
-                newTotalChars++;
-                currentInputLength = i + 1; // Track how many characters have been processed
-            }
+        newTotalChars++;
+        if (typedText[i] === lessonText[i]) {
+            charSpan.classList.add('correct-char');
+            newCorrectChars++;
+        } else {
+            charSpan.classList.add('incorrect-char');
         }
+        upToChar = i;
     }
-
+    
     correctChars = newCorrectChars;
     totalChars = newTotalChars;
 
-    // Highlight the next character to be typed
-    if (currentInputLength < lessonTextCombined.length) {
-        allCharSpans[currentInputLength].classList.add('current-char');
-        highlightCurrentKey(lessonTextCombined[currentInputLength]);
-    } else if (currentInputLength === lessonTextCombined.length && typedText.length === lessonTextCombined.length) {
-        // Lesson completed
+    // Highlight the next character
+    if (upToChar + 1 < allSpans.length) {
+        allSpans[upToChar + 1].classList.add('current-char');
+        highlightCurrentKey(lessonText[upToChar + 1]);
+    } else {
+        // End of lesson, clear highlight
+        highlightCurrentKey('');
+    }
+}
+
+function handleLessonProgress() {
+    const typedText = userInputElement.value;
+    const lessonText = currentLesson.join(' ');
+    
+    // Check for word completion
+    const currentWordText = currentLesson[currentWordIndex];
+    const typedWords = typedText.split(' ');
+    const currentTypedWord = typedWords[currentWordIndex];
+
+    if (currentTypedWord === currentWordText && typedText.endsWith(' ')) {
+        // User has correctly typed a word and a space, advance
+        currentWordIndex++;
+        
+        // This logic is simplified; a full app might not clear the input
+        // but for this project, we'll follow the pattern of clearing and advancing
+        const remainingText = typedWords.slice(currentWordIndex).join(' ');
+        if (remainingText === '') {
+             userInputElement.value = ''; // Simplified: clear for next word
+        }
+    }
+
+    // Check for lesson completion
+    if (typedText === lessonText) {
         clearInterval(timerInterval);
         userInputElement.disabled = true;
-        alert('Lesson Completed! Well done!');
-        highlightCurrentKey(''); // Clear virtual keyboard highlight
-    }
-
-
-    // Logic to move to the next word/lesson (simplified for now)
-    // This part will need refinement to correctly handle word boundaries and spaces.
-    // For now, let's just highlight the next expected character.
-    // A more robust approach would be to process word by word.
-
-    // A simpler word-by-word comparison logic
-    let inputWords = typedText.split(' ');
-    let currentInputWord = inputWords[currentWordIndex] || '';
-
-    // If the current word is fully typed and correct, move to the next word
-    if (currentInputWord === currentLesson[currentWordIndex] && typedText.endsWith(' ')) {
-        currentWordIndex++;
-        // If all words in the lesson are typed, move to next lesson
-        if (currentWordIndex >= currentLesson.length) {
+        
+        setTimeout(() => {
+            alert('Lesson Completed! Well done!');
             currentLessonIndex = (currentLessonIndex + 1) % lessons.length;
             initLesson();
-        }
-        userInputElement.value = ''; // Clear input for the next word/lesson
-        renderLessonText(); // Re-render to highlight new current word/char
-        highlightCurrentKey(currentLesson[currentWordIndex] ? currentLesson[currentWordIndex][0] : '');
-    } else {
-        // Highlight the current character being typed within the word
-        const expectedCharForHighlight = currentLesson[currentWordIndex] ? currentLesson[currentWordIndex][currentInputWord.length] : '';
-        highlightCurrentKey(expectedCharForHighlight);
+        }, 100);
     }
-
-    updateStats();
 }
+
 
 function renderLessonText() {
     lessonTextElement.innerHTML = '';
@@ -225,6 +219,8 @@ function startTimer() {
 }
 
 function updateStats() {
+    if (startTime === 0) return; // Do not update stats if the timer hasn't started
+
     const currentTime = new Date().getTime();
     const timeElapsedInMinutes = (currentTime - startTime) / 60000; // in minutes
 
@@ -238,6 +234,18 @@ function updateStats() {
     accuracyElement.textContent = `${accuracy}%`;
 }
 
+function normalizeKey(key) {
+    if (key === ' ') return 'space';
+    if (key === 'Backspace') return 'backspace';
+    if (key === 'Shift') return 'shift';
+    if (key === 'Control') return 'ctrl';
+    if (key === 'Alt') return 'alt';
+    if (key === 'Enter') return 'enter';
+    if (key === 'Tab') return 'tab';
+    if (key === 'CapsLock') return 'capslock';
+    return key.toLowerCase();
+}
+
 // Global event listeners for physical key presses (these don't need to be re-attached per test)
 document.addEventListener('keydown', (e) => {
     // Only if the user-input element is focused, otherwise physical keypresses might interfere with other elements in the test runner
@@ -246,24 +254,7 @@ document.addEventListener('keydown', (e) => {
         document.querySelectorAll('.key.correct').forEach(key => key.classList.remove('correct'));
         document.querySelectorAll('.key.incorrect').forEach(key => key.classList.remove('incorrect'));
 
-        let pressedKey = e.key.toLowerCase();
-        if (e.key === ' ') {
-            pressedKey = 'space';
-        } else if (e.key === 'Backspace') {
-            pressedKey = 'backspace';
-        } else if (e.key === 'Shift') {
-            pressedKey = 'shift';
-        } else if (e.key === 'Control') {
-            pressedKey = 'ctrl';
-        } else if (e.key === 'Alt') {
-            pressedKey = 'alt';
-        } else if (e.key === 'Enter') {
-            pressedKey = 'enter';
-        } else if (e.key === 'Tab') {
-            pressedKey = 'tab';
-        } else if (e.key === 'CapsLock') {
-            pressedKey = 'capslock';
-        }
+        const pressedKey = normalizeKey(e.key);
         
 
         const keyElement = virtualKeyboardElement.querySelector(`[data-key="${pressedKey}"]`);
@@ -275,24 +266,7 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('keyup', (e) => {
     if (document.activeElement === userInputElement) {
-        let releasedKey = e.key.toLowerCase();
-        if (e.key === ' ') {
-            releasedKey = 'space';
-        } else if (e.key === 'Backspace') {
-            releasedKey = 'backspace';
-        } else if (e.key === 'Shift') {
-            releasedKey = 'shift';
-        } else if (e.key === 'Control') {
-            releasedKey = 'ctrl';
-        } else if (e.key === 'Alt') {
-            releasedKey = 'alt';
-        } else if (e.key === 'Enter') {
-            releasedKey = 'enter';
-        } else if (e.key === 'Tab') {
-            releasedKey = 'tab';
-        } else if (e.key === 'CapsLock') {
-            releasedKey = 'capslock';
-        }
+        const releasedKey = normalizeKey(e.key);
 
         const keyElement = virtualKeyboardElement.querySelector(`[data-key="${releasedKey}"]`);
         if (keyElement) {

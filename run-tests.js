@@ -36,12 +36,21 @@ async function runTests() {
         console.log(`PAGE CONSOLE [${msg.type().toUpperCase()}]:`, msg.text());
     });
 
-    // 4. Create a promise that resolves when QUnit is done
-    let qunitDonePromise = new Promise((resolve, reject) => {
-      page.exposeFunction('onQunitDone', (details) => {
-        resolve(details);
-      });
-    });
+    // 4. Create a promise that resolves when QUnit is done, with a timeout to avoid hanging CI
+    const QUNIT_TIMEOUT_MS = 60_000;
+
+    let qunitDonePromise = Promise.race([
+      new Promise((resolve, reject) => {
+        page.exposeFunction('onQunitDone', (details) => {
+          resolve(details);
+        });
+      }),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`QUnit tests did not finish within ${QUNIT_TIMEOUT_MS}ms`));
+        }, QUNIT_TIMEOUT_MS);
+      }),
+    ]);
 
     // 3. Navigate to the test page
     const testUrl = `http://localhost:${PORT}/tests/index.html`;
